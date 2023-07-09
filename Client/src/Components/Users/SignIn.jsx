@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react'
 import '../../CSS/Users.css'
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { LOGIN } from '../../Redux/types/authTypes';
 
-
-export default function SignIn({ updateIsLog }) {
+export default function SignIn() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const isLogIn = useDispatch();
 
   const navigate = useNavigate();
   const [user, setUser] = useState(false);
@@ -77,12 +80,12 @@ export default function SignIn({ updateIsLog }) {
     const email = event.target.email.value;
     const password = event.target.password.value;
 
-    await axios.post('http://localhost:8000/login', { email, password }).then((res) => {
+    await axios.post('http://localhost:7777/auth/Login', { email, password }).then((res) => {
 
-      localStorage.setItem("token", JSON.stringify(res.data.Token));
+      localStorage.setItem("token", res.data.jwttoken);
 
       console.log(res)
-      updateIsLog(true);
+      isLogIn({type:LOGIN});
       event.target.reset();
       navigate(path);
 

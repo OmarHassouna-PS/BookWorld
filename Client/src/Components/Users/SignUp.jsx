@@ -1,30 +1,31 @@
 import React, { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import '../../CSS/Users.css'
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import { LOGIN } from '../../Redux/types/authTypes';
 
 export default function SignUp() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
+
+  const isLogIn = useDispatch();
+
   const navigate = useNavigate();
 
   const [path, setPath] = useState('/');
   const [userCheck, setUserCheck] = useState(false);
 
   const [user, setUser] = useState({
-    username: '',
-    phone: '',
+    userName: '',
     email: '',
     password: ''
   })
 
   const [checkInput, setCheckInput] = useState({
-    username: false,
-    phone: false,
+    userName: false,
     email: false,
     password: false,
     confirmPassword: false
@@ -40,14 +41,12 @@ export default function SignUp() {
   const [inputTheme, setInputTheme] = useState({
     email: themeValue.normal,
     password: themeValue.normal,
-    username: themeValue.normal,
-    phone: themeValue.normal,
+    userName: themeValue.normal,
     confirmPassword: themeValue.normal
   });
 
   const [massageWarning, setMassageWarning] = useState({
-    username: '',
-    phone: '',
+    userName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -57,41 +56,19 @@ export default function SignUp() {
 
   function handleName(event) {
     const name = event.target.value;
-    setCheckInput({ ...checkInput, username: false });
+    setCheckInput({ ...checkInput, userName: false });
 
     if (name === '') {
-      setInputTheme({ ...inputTheme, username: themeValue.normal });
-      setMassageWarning({ ...massageWarning, username: 'Required!' });
+      setInputTheme({ ...inputTheme, userName: themeValue.normal });
+      setMassageWarning({ ...massageWarning, userName: 'Required!' });
     }
     else {
-      setInputTheme({ ...inputTheme, username: themeValue.success })
-      setMassageWarning({ ...massageWarning, username: '' });
-      setUser({ ...user, username: name });
-      setCheckInput({ ...checkInput, username: true });
+      setInputTheme({ ...inputTheme, userName: themeValue.success })
+      setMassageWarning({ ...massageWarning, userName: '' });
+      setUser({ ...user, userName: name });
+      setCheckInput({ ...checkInput, userName: true });
     }
   }
-
-  function handlePhone(event) {
-    const patternPhone = /^07\d{8}$/;
-    setCheckInput({ ...checkInput, phone: false });
-    const phone = event.target.value;
-
-    if (phone === '') {
-      setInputTheme({ ...inputTheme, phone: themeValue.normal });
-      setMassageWarning({ ...massageWarning, phone: 'Required!' });
-    }
-    else if (!patternPhone.test(phone)) {
-      setInputTheme({ ...inputTheme, phone: themeValue.error })
-      setMassageWarning({ ...massageWarning, phone: 'Invalid number' })
-    }
-    else {
-      setMassageWarning({ ...massageWarning, phone: '' })
-      setInputTheme({ ...inputTheme, phone: themeValue.success })
-      setUser({ ...user, phone: phone });
-      setCheckInput({ ...checkInput, phone: true });
-    }
-  }
-
 
   async function handleEmail(event) {
     const patternEmail = /^[A-z0-9\.]+@[A-z0-9]+\.[A-z]{3,5}$/;
@@ -161,7 +138,7 @@ export default function SignUp() {
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (checkInput.username && checkInput.email && checkInput.phone && checkInput.password && checkInput.confirmPassword) {
+    if (checkInput.userName && checkInput.email && checkInput.password && checkInput.confirmPassword) {
 
       sendDataToServer(user);
 
@@ -175,11 +152,13 @@ export default function SignUp() {
 
   function sendDataToServer(user) {
 
-    axios.post('http://localhost:8000/user', user).then((res) => {
+    axios.post('http://localhost:7777/auth/SignUp', user).then((res) => {
 
-      localStorage.setItem("token", res.data.Token);
-
+      localStorage.setItem("token", res.data.jwttoken);
       console.log(res)
+
+      isLogIn({ type: LOGIN });
+
     }).catch((err) => {
       console.log(err);
     })
@@ -200,14 +179,9 @@ export default function SignUp() {
               <form onSubmit={(event) => handleSubmit(event)}>
                 <div class="mx-auto max-w-xs">
                   <div class="mb-3">
-                    <label for="name" className={`block mb-2 text-sm font-medium text-${inputTheme.username}-700 dark:text-${inputTheme.username}-500 `}>Full name</label>
-                    <input onChange={(event) => handleName(event)} type="text" id="name" className={`border-${inputTheme.username}-300 text-${inputTheme.username}-900 dark:text-${inputTheme.username}-400 placeholder-${inputTheme.username}-700 dark:placeholder-${inputTheme.username}-500 focus:ring-${inputTheme.username}-500 focus:border-${inputTheme.username}-500 dark:border-${inputTheme.username}-500 bg-white border-2 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 focus:outline-none`} placeholder="Enter your name" />
+                    <label for="name" className={`block mb-2 text-sm font-medium text-${inputTheme.userName}-700 dark:text-${inputTheme.userName}-500 `}>Full name</label>
+                    <input onChange={(event) => handleName(event)} type="text" id="name" className={`border-${inputTheme.userName}-300 text-${inputTheme.userName}-900 dark:text-${inputTheme.userName}-400 placeholder-${inputTheme.userName}-700 dark:placeholder-${inputTheme.userName}-500 focus:ring-${inputTheme.userName}-500 focus:border-${inputTheme.userName}-500 dark:border-${inputTheme.userName}-500 bg-white border-2 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 focus:outline-none`} placeholder="Enter your name" />
                     <p className={`mt-2 text-sm text-${themeValue.warning}-600 dark:text-${themeValue.warning}-500`}><span class="font-medium">{massageWarning.name}</span></p>
-                  </div>
-                  <div class="mb-3">
-                    <label for="phone" className={`block mb-2 text-sm font-medium text-${inputTheme.phone}-700 dark:text-${inputTheme.phone}-500 `}>Phone</label>
-                    <input onChange={(event) => handlePhone(event)} type="text" id="phone" className={`border-${inputTheme.phone}-300 text-${inputTheme.phone}-900 dark:text-${inputTheme.phone}-400 placeholder-${inputTheme.phone}-700 dark:placeholder-${inputTheme.phone}-500 focus:ring-${inputTheme.phone}-500 focus:border-${inputTheme.phone}-500 dark:border-${inputTheme.phone}-500 bg-white border-2 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 focus:outline-none`} placeholder="Enter your phone" />
-                    <p className={`mt-2 text-sm text-${themeValue.warning}-600 dark:text-${themeValue.warning}-500`}><span class="font-medium">{massageWarning.phone}</span></p>
                   </div>
                   <div class="mb-3">
                     <label for="email" className={`block mb-2 text-sm font-medium text-${inputTheme.email}-700 dark:text-${inputTheme.email}-500 `}>Email</label>
